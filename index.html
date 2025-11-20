@@ -5,7 +5,6 @@
   <title>BTC Titan WebApp</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Styles -->
   <style>
     * {
       box-sizing: border-box;
@@ -394,6 +393,10 @@
       tg.expand();
     }
 
+    // ---------- ÉTAT & PERSISTENCE LOCALSTORAGE ----------
+
+    const STORAGE_KEY = "btc_titan_state_v1";
+
     const state = {
       coins: 0,
       totalCoins: 0,
@@ -405,7 +408,26 @@
       lastDaily: 0,
     };
 
-    const xpBase = 20;
+    function loadLocalState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        Object.assign(state, saved);
+      } catch (e) {
+        console.warn("Erreur loadLocalState:", e);
+      }
+    }
+
+    function saveLocalState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.warn("Erreur saveLocalState:", e);
+      }
+    }
+
+    // ---------- UI ----------
 
     const coinsEl = document.getElementById("coins");
     const powerEl = document.getElementById("power");
@@ -423,6 +445,8 @@
     const btcBtn = document.getElementById("btc-btn");
     const dailyBtn = document.getElementById("daily-btn");
     const prestigeBtn = document.getElementById("prestige-btn");
+
+    const xpBase = 20;
 
     function levelTitle(lvl) {
       if (lvl < 5) return "Rookie Titan";
@@ -457,17 +481,8 @@
         logEl.textContent = message;
       }
 
-      // Envoie OPTIONNEL des données au bot
-      if (tg) {
-        tg.sendData(
-          JSON.stringify({
-            coins: state.coins,
-            power: state.power,
-            level: state.level,
-            prestige: state.prestige,
-          })
-        );
-      }
+      saveLocalState();
+      sendStateToBot();
     }
 
     function addXP(amount) {
@@ -482,6 +497,38 @@
       }
       return leveled;
     }
+
+    // ---------- SYNC AVEC LE BOT ----------
+
+    let lastSync = 0;
+    function sendStateToBot(force = false) {
+      if (!tg) return;
+
+      const now = Date.now();
+      if (!force && now - lastSync < 2000) {
+        // pas plus d'une fois toutes les 2s hors force
+        return;
+      }
+      lastSync = now;
+
+      const payload = {
+        coins: state.coins,
+        totalCoins: state.totalCoins,
+        power: state.power,
+        level: state.level,
+        xp: state.xp,
+        btcLevel: state.btcLevel,
+        prestige: state.prestige,
+      };
+
+      try {
+        Telegram.WebApp.sendData(JSON.stringify(payload));
+      } catch (e) {
+        console.warn("Erreur sendData:", e);
+      }
+    }
+
+    // ---------- ACTIONS ----------
 
     hitBtn.addEventListener("click", () => {
       const gain = state.power + state.prestige;
@@ -555,7 +602,9 @@
       );
     });
 
-    // Init
+    // ---------- INIT ----------
+
+    loadLocalState();
     updateUI("Bienvenue, Titan ! Frappe pour commencer à farmer.");
   </script>
 </body>

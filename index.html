@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>BTC Titan WebApp</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Styles -->
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle at top, #1b1b1f, #050509);
+      color: #f5f5f5;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(12, 12, 18, 0.95);
+      border-radius: 20px;
+      padding: 16px 16px 20px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+      border: 1px solid rgba(255, 215, 0, 0.2);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .title {
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .title span {
+      font-size: 26px;
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 215, 0, 0.5);
+      background: linear-gradient(135deg, #2a2010, #423000);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .stat {
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: #111116;
+      border: 1px solid #242438;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: #a0a0c0;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .stat-value {
+      font-size: 14px;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .avatar-card {
+      display: flex;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 16px;
+      background: radial-gradient(circle at top, #262235, #141220);
+      border: 1px solid #2f2640;
+      margin-bottom: 14px;
+    }
+
+    .avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 18px;
+      background: radial-gradient(circle at 30% 20%, #ffd54a, #b37a02);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .avatar-body {
+      position: absolute;
+      bottom: -4px;
+      width: 120%;
+      height: 70%;
+      background: linear-gradient(180deg, #ffb6a0, #c95c3b);
+      border-radius: 50% 50% 20% 20%;
+      box-shadow: 0 -3px 0 rgba(0, 0, 0, 0.3) inset;
+    }
+
+    .avatar-chest-line {
+      position: absolute;
+      bottom: 22px;
+      width: 80%;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.35);
+    }
+
+    .avatar-arms {
+      position: absolute;
+      bottom: 12px;
+      width: 110%;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 10px;
+    }
+
+    .arm {
+      width: 16px;
+      height: 30px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #ffb6a0, #c95c3b);
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+    }
+
+    .avatar-head {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .btc-circle {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 20%, #ffeaa5, #ffb300);
+      border: 2px solid #f4f4f4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 800;
+      color: #5c3b00;
+      text-shadow: 0 0 4px rgba(255, 255, 255, 0.7);
+    }
+
+    .avatar-eyes {
+      display: flex;
+      gap: 6px;
+      margin-top: -2px;
+      font-size: 10px;
+      color: #1c1c2a;
+    }
+
+    .avatar-sub {
+      font-size: 10px;
+      color: #ffe8a0;
+      text-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .avatar-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+      font-size: 13px;
+    }
+
+    .bar {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: #15151f;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #ffe066, #ff9f1c);
+      width: 20%;
+      transition: width 0.2s ease-out;
+    }
+
+    .bar-label {
+      font-size: 11px;
+      color: #a0a0c0;
+    }
+
+    .big-button {
+      width: 100%;
+      border: none;
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      cursor: pointer;
+      background: radial-gradient(circle at top, #ffb300, #ff7a00);
+      color: #2a1300;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      transition: transform 0.05s ease, box-shadow 0.05s ease;
+    }
+
+    .big-button:active {
+      transform: translateY(2px) scale(0.97);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.7);
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .action-btn {
+      font-size: 13px;
+      padding: 10px;
+      border-radius: 14px;
+      border: 1px solid #29293a;
+      background: #111018;
+      color: #e0e0ff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: background 0.12s ease, transform 0.05s ease,
+        border-color 0.12s ease;
+    }
+
+    .action-btn span:first-child {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .action-btn small {
+      font-size: 11px;
+      color: #a0a0c0;
+    }
+
+    .action-btn:active {
+      transform: translateY(1px);
+      background: #1b1b2a;
+      border-color: #3b3b5a;
+    }
+
+    .log {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #c8c8e2;
+      min-height: 36px;
+    }
+
+    .accent {
+      color: #ffd54a;
+      font-weight: 600;
+    }
+  </style>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <div class="title">
+        <span>💪🟡</span> BTC Titan
+      </div>
+      <div class="badge" id="badge-label">Rookie Titan</div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Coins</div>
+        <div class="stat-value" id="coins">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Force</div>
+        <div class="stat-value" id="power">1</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Niveau</div>
+        <div class="stat-value" id="level">1</div>
+      </div>
+    </div>
+
+    <div class="avatar-card">
+      <div class="avatar">
+        <div class="avatar-body"></div>
+        <div class="avatar-arms">
+          <div class="arm"></div>
+          <div class="arm"></div>
+        </div>
+        <div class="avatar-chest-line"></div>
+        <div class="avatar-head">
+          <div class="btc-circle">₿</div>
+          <div class="avatar-eyes">◉ ‿ ◉</div>
+          <div class="avatar-sub">Titan musclé</div>
+        </div>
+      </div>
+      <div class="avatar-info">
+        <div>
+          <strong id="title-label">Rookie Titan</strong>
+          <div class="bar">
+            <div class="bar-fill" id="xp-bar"></div>
+          </div>
+          <div class="bar-label" id="xp-label">XP 0 / 20</div>
+        </div>
+        <div style="margin-top:6px;font-size:12px;color:#c0c0ff;">
+          Frappe pour gagner des <span class="accent">TitanCoins</span>, booste ta
+          <span class="accent">force</span> et fais évoluer ta
+          <span class="accent">tête BTC</span>.
+        </div>
+      </div>
+    </div>
+
+    <button class="big-button" id="hit-btn">
+      <span>💥 FRAPPE TITAN</span>
+      <span id="hit-gain">+1</span>
+    </button>
+
+    <div class="actions">
+      <button class="action-btn" id="muscle-btn">
+        <span>
+          <span>💪 Muscles</span>
+          <small id="muscle-cost-label">Coût : 10</small>
+        </span>
+        <span>+1 force</span>
+      </button>
+
+      <button class="action-btn" id="btc-btn">
+        <span>
+          <span>🧠 BTC-Head</span>
+          <small id="btc-cost-label">Coût : 30</small>
+        </span>
+        <span>+1 force</span>
+      </button>
+
+      <button class="action-btn" id="daily-btn">
+        <span>
+          <span>🎁 Daily Boost</span>
+          <small>1 fois / jour</small>
+        </span>
+        <span>+coins</span>
+      </button>
+
+      <button class="action-btn" id="prestige-btn">
+        <span>
+          <span>🔁 Prestige</span>
+          <small>Reset, +bonus</small>
+        </span>
+        <span>⚡</span>
+      </button>
+    </div>
+
+    <div class="log" id="log"></div>
+  </div>
+
+  <script>
+    const tg = window.Telegram ? Telegram.WebApp : null;
+    if (tg) {
+      tg.expand();
+    }
+
+    const state = {
+      coins: 0,
+      totalCoins: 0,
+      power: 1,
+      level: 1,
+      xp: 0,
+      btcLevel: 1,
+      prestige: 0,
+      lastDaily: 0,
+    };
+
+    const xpBase = 20;
+
+    const coinsEl = document.getElementById("coins");
+    const powerEl = document.getElementById("power");
+    const levelEl = document.getElementById("level");
+    const xpBarEl = document.getElementById("xp-bar");
+    const xpLabelEl = document.getElementById("xp-label");
+    const titleLabel = document.getElementById("title-label");
+    const badgeLabel = document.getElementById("badge-label");
+    const logEl = document.getElementById("log");
+    const hitBtn = document.getElementById("hit-btn");
+    const hitGainEl = document.getElementById("hit-gain");
+    const muscleCostLabel = document.getElementById("muscle-cost-label");
+    const btcCostLabel = document.getElementById("btc-cost-label");
+    const muscleBtn = document.getElementById("muscle-btn");
+    const btcBtn = document.getElementById("btc-btn");
+    const dailyBtn = document.getElementById("daily-btn");
+    const prestigeBtn = document.getElementById("prestige-btn");
+
+    function levelTitle(lvl) {
+      if (lvl < 5) return "Rookie Titan";
+      if (lvl < 10) return "Crypto Bruiser";
+      if (lvl < 20) return "BTC Destroyer";
+      return "Legendary BTC Titan";
+    }
+
+    function updateUI(message) {
+      coinsEl.textContent = state.coins;
+      powerEl.textContent = state.power;
+      levelEl.textContent = state.level;
+
+      const needed = state.level * xpBase;
+      xpLabelEl.textContent = `XP ${state.xp} / ${needed}`;
+      const ratio = Math.max(0, Math.min(1, state.xp / needed));
+      xpBarEl.style.width = `${ratio * 100}%`;
+
+      const title = levelTitle(state.level);
+      titleLabel.textContent = title;
+      badgeLabel.textContent = title;
+
+      hitGainEl.textContent = `+${state.power + state.prestige}`;
+
+      const muscleCost = 10 * state.power;
+      const btcCost = 30 * state.btcLevel;
+
+      muscleCostLabel.textContent = `Coût : ${muscleCost}`;
+      btcCostLabel.textContent = `Coût : ${btcCost}`;
+
+      if (message) {
+        logEl.textContent = message;
+      }
+
+      // Envoie OPTIONNEL des données au bot
+      if (tg) {
+        tg.sendData(
+          JSON.stringify({
+            coins: state.coins,
+            power: state.power,
+            level: state.level,
+            prestige: state.prestige,
+          })
+        );
+      }
+    }
+
+    function addXP(amount) {
+      state.xp += amount;
+      let leveled = false;
+      let needed = state.level * xpBase;
+      while (state.xp >= needed) {
+        state.xp -= needed;
+        state.level += 1;
+        needed = state.level * xpBase;
+        leveled = true;
+      }
+      return leveled;
+    }
+
+    hitBtn.addEventListener("click", () => {
+      const gain = state.power + state.prestige;
+      state.coins += gain;
+      state.totalCoins += gain;
+      const leveled = addXP(1);
+
+      let msg = `💥 Frappe Titan ! Tu gagnes ${gain} TitanCoins.`;
+      if (leveled) {
+        msg += ` ⚡ Niveau ${state.level} atteint !`;
+      }
+      updateUI(msg);
+    });
+
+    muscleBtn.addEventListener("click", () => {
+      const cost = 10 * state.power;
+      if (state.coins < cost) {
+        updateUI("❌ Pas assez de TitanCoins pour booster tes muscles.");
+        return;
+      }
+      state.coins -= cost;
+      state.power += 1;
+      updateUI("💪 Tes muscles gonflent ! Force +1.");
+    });
+
+    btcBtn.addEventListener("click", () => {
+      const cost = 30 * state.btcLevel;
+      if (state.coins < cost) {
+        updateUI("❌ Pas assez de TitanCoins pour upgrader ta tête BTC.");
+        return;
+      }
+      state.coins -= cost;
+      state.btcLevel += 1;
+      state.power += 1;
+      updateUI("🧠🟡 BTC-Head amélioré ! Force +1.");
+    });
+
+    dailyBtn.addEventListener("click", () => {
+      const now = Date.now();
+      const oneDay = 24 * 60 * 60 * 1000;
+      if (now - state.lastDaily < oneDay) {
+        updateUI("⏳ Daily déjà pris, reviens plus tard.");
+        return;
+      }
+      const bonus = 100 + state.prestige * 20;
+      state.coins += bonus;
+      state.totalCoins += bonus;
+      state.lastDaily = now;
+      updateUI(`🎁 Daily Boost ! Tu reçois ${bonus} TitanCoins.`);
+    });
+
+    prestigeBtn.addEventListener("click", () => {
+      const minLevel = 10;
+      const minCoins = 500;
+      if (state.level < minLevel || state.coins < minCoins) {
+        updateUI(
+          `🔁 Prestige indisponible. Il faut au moins niveau ${minLevel} et ${minCoins} TitanCoins.`
+        );
+        return;
+      }
+
+      state.prestige += 1;
+      state.coins = 0;
+      state.power = 1 + state.prestige;
+      state.level = 1;
+      state.xp = 0;
+      state.btcLevel = 1;
+
+      updateUI(
+        `⚡ Prestige effectué ! Prestige ${state.prestige}, force de base ${state.power}.`
+      );
+    });
+
+    // Init
+    updateUI("Bienvenue, Titan ! Frappe pour commencer à farmer.");
+  </script>
+</body>
+</html>
